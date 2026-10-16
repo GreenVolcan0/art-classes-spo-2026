@@ -155,6 +155,9 @@
 | Просмотр журнала действий | ❌ | ❌ | ✅ |
  
 ## 5. Диаграмма прецедентов
+
+<img width="625" height="1345" alt="изображение" src="https://github.com/user-attachments/assets/b64f8e69-37cd-4eab-8ff7-a8a75621a400" />
+
  
 **Акторы:**
  
