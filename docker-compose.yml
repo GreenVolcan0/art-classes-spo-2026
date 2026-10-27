@@ -28,12 +28,12 @@ services:
         condition: service_healthy
 
   # Фронтенд (React) добавит фронтенд-разработчик:
-  # front:
-  #   build: ./front
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - back
+  front:
+    build: ./front
+    ports:
+      - "3000:3000"
+    depends_on:
+      - back
 
 volumes:
   pgdata:

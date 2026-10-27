@@ -1,0 +1,22 @@
+# Зависимости
+node_modules
+
+# Сборка
+dist
+dist-ssr
+
+# Локальные переменные окружения
+.env
+.env.local
+.env.*.local
+
+# Логи
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Редакторы / ОС
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
