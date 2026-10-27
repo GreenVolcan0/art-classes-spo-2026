@@ -7,14 +7,23 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import ErrorAlert from '../../components/ui/ErrorAlert';
 import Loading from '../../components/ui/Loading';
-import { toLocalInput } from '../../utils/format';
+import {
+  toLocalInput,
+  isoDateToRu,
+  ruDateToIso,
+  maskRuDate,
+  maskRuTime,
+  isValidRuDate,
+  isValidRuTime,
+} from '../../utils/format';
 
 const INITIAL = {
   category_id: '',
   title: '',
   description: '',
   location: '',
-  start_at: '',
+  start_date: '',
+  start_time: '',
   duration_min: '60',
   price: '',
   capacity: '10',
@@ -57,12 +66,14 @@ export default function WorkshopFormPage() {
         if (w.master?.id !== user?.id) {
           setNotOwner(true);
         } else {
+          const local = toLocalInput(w.start_at); // «гггг-мм-ддTчч:мм»
           setForm({
             category_id: w.category ? String(w.category.id) : '',
             title: w.title || '',
             description: w.description || '',
             location: w.location || '',
-            start_at: toLocalInput(w.start_at),
+            start_date: isoDateToRu(local.split('T')[0]),
+            start_time: local.split('T')[1] || '',
             duration_min: String(w.duration_min ?? ''),
             price: w.price != null ? String(w.price) : '',
             capacity: String(w.capacity ?? ''),
@@ -89,7 +100,10 @@ export default function WorkshopFormPage() {
       else if (form.title.trim().length > 200) errs.title = 'Максимум 200 символов';
       if (!form.description.trim()) errs.description = 'Опишите мастер-класс';
       if (!form.location.trim()) errs.location = 'Укажите место проведения';
-      if (!form.start_at) errs.start_at = 'Укажите дату и время';
+      if (!form.start_date) errs.start_date = 'Укажите дату';
+      else if (!isValidRuDate(form.start_date)) errs.start_date = 'Формат: дд.мм.гггг';
+      if (!form.start_time) errs.start_time = 'Укажите время';
+      else if (!isValidRuTime(form.start_time)) errs.start_time = 'Формат: чч:мм (24 часа)';
       const dur = Number(form.duration_min);
       if (!dur || dur < 1 || dur > 1440) errs.duration_min = 'От 1 до 1440 минут';
       const price = Number(form.price);
@@ -113,7 +127,7 @@ export default function WorkshopFormPage() {
       title: form.title.trim(),
       description: form.description.trim(),
       location: form.location.trim(),
-      start_at: form.start_at,
+      start_at: `${ruDateToIso(form.start_date)}T${form.start_time}`,
       duration_min: Number(form.duration_min),
       price: String(form.price),
       capacity: Number(form.capacity),
@@ -246,17 +260,40 @@ export default function WorkshopFormPage() {
               </Form.Group>
 
               <Row>
-                <Col sm={6} md={4}>
+                <Col sm={6} md={3}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Дата и время *</Form.Label>
+                    <Form.Label>Дата *</Form.Label>
                     <Form.Control
-                      type="datetime-local"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="off"
                       required
-                      value={form.start_at}
-                      onChange={setField('start_at')}
-                      isInvalid={!!errors.start_at}
+                      placeholder="дд.мм.гггг"
+                      value={form.start_date}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, start_date: maskRuDate(e.target.value) }))
+                      }
+                      isInvalid={!!errors.start_date}
                     />
-                    <Form.Control.Feedback type="invalid">{errors.start_at}</Form.Control.Feedback>
+                    <Form.Control.Feedback type="invalid">{errors.start_date}</Form.Control.Feedback>
+                  </Form.Group>
+                </Col>
+                <Col sm={6} md={2}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Время *</Form.Label>
+                    <Form.Control
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      required
+                      placeholder="чч:мм"
+                      value={form.start_time}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, start_time: maskRuTime(e.target.value) }))
+                      }
+                      isInvalid={!!errors.start_time}
+                    />
+                    <Form.Control.Feedback type="invalid">{errors.start_time}</Form.Control.Feedback>
                   </Form.Group>
                 </Col>
                 <Col sm={6} md={3}>
@@ -292,7 +329,7 @@ export default function WorkshopFormPage() {
                     <Form.Control.Feedback type="invalid">{errors.price}</Form.Control.Feedback>
                   </Form.Group>
                 </Col>
-                <Col sm={6} md={3}>
+                <Col sm={6} md={2}>
                   <Form.Group className="mb-3">
                     <Form.Label>Мест *</Form.Label>
                     <Form.Control

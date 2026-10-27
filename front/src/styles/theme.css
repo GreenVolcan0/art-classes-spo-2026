@@ -1,8 +1,14 @@
 :root {
   --ac-page-bg: #f5f7fb;
+  /* Приложение полностью светлое: заставляем нативные контролы
+     (всплывающие списки <select>, календарь в input[type=date]) использовать
+     светлую цветовую схему, даже если у ОС включена тёмная тема */
   color-scheme: light;
 }
 
+/* Фикс «белый текст на белом фоне» в нативных выпадающих списках:
+   Chromium на Linux с тёмной GTK-темой рисует попап белым, а текст опций
+   берёт из темы ОС. Явные цвета на option перекрывают тему ОС. */
 .form-select option,
 select option {
   background-color: #ffffff;
@@ -101,15 +107,29 @@ a:hover {
   border-left: 4px solid var(--bs-warning);
 }
 
+/* === Фикс №2: нативный попап <select> в Firefox на Linux ===
+   Firefox с тёмной системной (GTK) темой рисует выпадающий список
+   «белым по белому» — известный баг рендера нативных попапов, который
+   не лечится ни color-scheme, ни явными цветами на option.
+   Решение: переводим <select> в «базовый» режим (appearance: base-select,
+   поддерживается Firefox 141+ и Chrome 135+). В этом режиме список опций
+   рисуется как обычная DOM-вёрстка самой страницей, и его цветами
+   полностью управляет наш CSS. Браузеры без поддержки этого значения
+   просто проигнорируют весь блок и останутся на нативном попапе —
+   для них работает фикс №1 (color-scheme) выше. */
 @supports (appearance: base-select) {
   .form-select,
   select {
     appearance: base-select;
   }
+
+  /* Убираем штатную стрелку браузера — остаётся шеврон Bootstrap */
   .form-select::picker-icon,
   select::picker-icon {
     display: none;
   }
+
+  /* Сам выпадающий список (попап) */
   select::picker(select) {
     background-color: #ffffff;
     color: #212529;
@@ -119,17 +139,22 @@ a:hover {
     padding: 0.25rem 0;
     margin-top: 0.25rem;
   }
+
+  /* Опции списка */
   select option {
     background-color: #ffffff;
     color: #212529;
     padding: 0.35rem 1.25rem;
     cursor: pointer;
   }
+
   select option:hover,
   select option:focus {
     background-color: #e9ecef;
     color: #212529;
   }
+
+  /* Выбранная опция — мягкая подсветка в стиле Bootstrap */
   select option:checked {
     background-color: #e7f1ff;
     color: #0d6efd;

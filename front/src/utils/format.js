@@ -63,3 +63,46 @@ export function personName(person) {
   if (!person) return '—';
   return [person.first_name, person.last_name].filter(Boolean).join(' ') || '—';
 }
+
+// ---------- Ввод дат в формате (дд.мм.гггг) ----------
+
+/** Маска ввода даты: оставляет только цифры и сама расставляет точки (28.02.2026). */
+export function maskRuDate(raw) {
+  const digits = String(raw).replace(/\D/g, '').slice(0, 8);
+  return [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4, 8)].filter(Boolean).join('.');
+}
+
+/** Маска ввода времени в 24-часовом формате: чч:мм. */
+export function maskRuTime(raw) {
+  const digits = String(raw).replace(/\D/g, '').slice(0, 4);
+  return [digits.slice(0, 2), digits.slice(2, 4)].filter(Boolean).join(':');
+}
+
+/** дд.мм.гггг — полная корректная дата (учитывается и число дней в месяце). */
+export function isValidRuDate(text) {
+  const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(String(text));
+  if (!m) return false;
+  const dd = Number(m[1]);
+  const mm = Number(m[2]);
+  const yyyy = Number(m[3]);
+  if (mm < 1 || mm > 12) return false;
+  const d = new Date(yyyy, mm - 1, dd);
+  return d.getFullYear() === yyyy && d.getMonth() === mm - 1 && d.getDate() === dd;
+}
+
+/** Корректное время чч:мм (00:00–23:59). */
+export function isValidRuTime(text) {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(String(text));
+}
+
+/** дд.мм.гггг -> гггг-мм-дд (формат, который принимает API). */
+export function ruDateToIso(text) {
+  const m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(String(text));
+  return m ? `${m[3]}-${m[2]}-${m[1]}` : '';
+}
+
+/** гггг-мм-дд -> дд.мм.гггг (для предзаполнения полей при редактировании). */
+export function isoDateToRu(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso));
+  return m ? `${m[3]}.${m[2]}.${m[1]}` : '';
+}

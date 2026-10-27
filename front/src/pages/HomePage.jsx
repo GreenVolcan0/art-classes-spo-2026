@@ -8,6 +8,7 @@ import ErrorAlert from '../components/ui/ErrorAlert';
 import EmptyState from '../components/ui/EmptyState';
 import Loading from '../components/ui/Loading';
 import PaginationBar from '../components/ui/Pagination';
+import { maskRuDate, isValidRuDate, ruDateToIso } from '../utils/format';
 
 const PAGE_SIZE = 9;
 
@@ -36,6 +37,7 @@ export default function HomePage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showDateError, setShowDateError] = useState(false);
 
   // Список категорий для фильтра
   useEffect(() => {
@@ -52,8 +54,8 @@ export default function HomePage() {
     if (f.master_id) params.master_id = Number(f.master_id);
     if (f.price_min !== '') params.price_min = f.price_min;
     if (f.price_max !== '') params.price_max = f.price_max;
-    if (f.date_from) params.date_from = f.date_from;
-    if (f.date_to) params.date_to = f.date_to;
+    if (f.date_from && isValidRuDate(f.date_from)) params.date_from = ruDateToIso(f.date_from);
+    if (f.date_to && isValidRuDate(f.date_to)) params.date_to = ruDateToIso(f.date_to);
     if (f.only_available) params.only_available = true;
     return params;
   }, []);
@@ -81,8 +83,24 @@ export default function HomePage() {
     setOffset(0);
   }, [applied, load]);
 
+  // Валидация дат фильтра — вводятся в российском формате дд.мм.гггг
+  const dateFromOk = filters.date_from === '' || isValidRuDate(filters.date_from);
+  const dateToOk = filters.date_to === '' || isValidRuDate(filters.date_to);
+  const datesOrderOk =
+    filters.date_from === '' ||
+    filters.date_to === '' ||
+    (isValidRuDate(filters.date_from) &&
+      isValidRuDate(filters.date_to) &&
+      ruDateToIso(filters.date_to) >= ruDateToIso(filters.date_from));
+  const datesValid = dateFromOk && dateToOk && datesOrderOk;
+
   const apply = (e) => {
     e.preventDefault();
+    if (!datesValid) {
+      setShowDateError(true);
+      return;
+    }
+    setShowDateError(false);
     setOffset(0);
     setApplied({ ...filters });
   };
@@ -91,6 +109,7 @@ export default function HomePage() {
     setFilters({ ...EMPTY_FILTERS });
     setApplied({ ...EMPTY_FILTERS });
     setOffset(0);
+    setShowDateError(false);
     setSearchParams({});
   };
 
@@ -190,21 +209,46 @@ export default function HomePage() {
                   <Row className="g-2">
                     <Col>
                       <Form.Control
-                        type="date"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="off"
+                        placeholder="дд.мм.гггг"
                         title="Дата с"
                         value={filters.date_from}
-                        onChange={setField('date_from')}
+                        onChange={(e) =>
+                          setFilters((f) => ({
+                            ...f,
+                            date_from: maskRuDate(e.target.value),
+                          }))
+                        }
+                        isInvalid={showDateError && !dateFromOk}
                       />
                     </Col>
                     <Col>
                       <Form.Control
-                        type="date"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="off"
+                        placeholder="дд.мм.гггг"
                         title="Дата по"
                         value={filters.date_to}
-                        onChange={setField('date_to')}
+                        onChange={(e) =>
+                          setFilters((f) => ({
+                            ...f,
+                            date_to: maskRuDate(e.target.value),
+                          }))
+                        }
+                        isInvalid={showDateError && (!dateToOk || !datesOrderOk)}
                       />
                     </Col>
                   </Row>
+                  {showDateError && !datesValid && (
+                    <Form.Text className="text-danger">
+                      {dateFromOk && dateToOk
+                        ? 'Дата «по» не может быть раньше даты «с»'
+                        : 'Введите дату в формате дд.мм.гггг'}
+                    </Form.Text>
+                  )}
                 </Form.Group>
 
                 <Form.Check
