@@ -12,7 +12,6 @@ from app.services.audit import log_action
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 def register(data: RegisterIn, db: Session = Depends(get_db)):
     """Саморегистрация. Роль — client или master; admin через регистрацию получить нельзя."""
@@ -27,7 +26,6 @@ def register(data: RegisterIn, db: Session = Depends(get_db)):
         last_name=data.last_name.strip(),
         phone=data.phone,
         role=data.role,
-        # Мастер ждёт подтверждения администратора; клиент сразу получает полный доступ
         is_approved=not is_master,
         bio=data.bio if is_master else None,
     )
@@ -38,10 +36,9 @@ def register(data: RegisterIn, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status.HTTP_409_CONFLICT, "Пользователь с таким email уже существует")
 
-    log_action(db, user.id, EntityType.user, user.id, Action.created, f"Регистрация, роль: {data.role.value}")
+    log_action(db, user.id, EntityType.user, user.id, Action.created, f"Регистрация, роль: {data.role}")
     db.commit()
     return user
-
 
 @router.post("/login", response_model=TokenOut)
 def login(data: LoginIn, db: Session = Depends(get_db)):

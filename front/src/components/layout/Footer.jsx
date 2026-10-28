@@ -6,9 +6,8 @@ export default function Footer() {
       <Container className="text-center text-muted small">
         <div>
           <i className="bi bi-palette-fill text-primary me-1" />
-          <b>АртКлассы</b> — бронирование творческих мастер-классов
+          <b>АртКлассы</b> - сервис бронирования мастер-классов
         </div>
-        <div className="mt-1">Учебный проект, СПО 2026</div>
       </Container>
     </footer>
   );

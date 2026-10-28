@@ -29,9 +29,6 @@ def _get_user(db: Session, user_id: int) -> User:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Пользователь не найден")
     return user
 
-
-# ---------------------------------------------------------------- пользователи
-
 @router.get("/users", response_model=Page[UserOut])
 def list_users(
     role: Optional[Role] = None,
