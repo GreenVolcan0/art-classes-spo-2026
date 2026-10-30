@@ -211,7 +211,8 @@
 - `Workshop → WorkshopChangeRequest`: на один мастер-класс может быть много запросов на изменение, но открытый (`pending`) только один;
 - `User → WorkshopChangeRequest`: мастер подаёт запросы (`requested_by`), администратор их рассматривает (`reviewed_by`);
 - `User → ActionLog`: один пользователь порождает много записей в журнале.
-<img width="1280" height="760" alt="изображение" src="https://github.com/user-attachments/assets/5525e753-e23e-40dd-889f-c3ea62f22748" />
+<img width="2560" height="1780" alt="изображение" src="https://github.com/user-attachments/assets/2517e8db-fd2f-410a-b543-3f19b969672c" />
+
 
  
 ## 7. Бизнес-логика
