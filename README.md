@@ -472,3 +472,7 @@ npm run build      # production-сборка в папку dist
 Запуск всего проекта целиком: `docker compose up --build`. Фронтенд поднимается на `http://localhost:3000`: nginx отдаёт статику и проксирует `/api` на сервис `back:8000` — фронтенд и API работают на одном origin, и CORS не требуется. `index.html` не кэшируется (после деплоя браузер сразу получает новую версию), статические файлы с хешами в имени кэшируются на 7 дней.
 
 Адрес API можно переопределить переменной `VITE_API_BASE_URL` (по умолчанию `/api`), а порт локального бэкенда для проксирования в dev-режиме — `VITE_PROXY_TARGET`.
+
+### User Story Map
+<img width="2560" height="1440" alt="изображение" src="https://github.com/user-attachments/assets/3940189a-9e19-4d3c-a52b-f0fdbe3dc3b7" />
+
